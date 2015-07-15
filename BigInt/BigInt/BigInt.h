@@ -1,6 +1,8 @@
 #pragma once
 #include <deque>
-#include <valarray>
+#include <iostream>
+#include <type_traits>
+
 using namespace std;
 
 template<typename C>
@@ -23,21 +25,21 @@ public:
 		: number{}
 		, sign{positive}
 	{}
-	
-	BigInt(const int num);
-	BigInt(const string& num);
+	template<typename T>
+	BigInt(const T num);
+	BigInt(const string& num) = delete; // Will be improved :3
 	BigInt(const Number& num, Sign s=positive)
-		: number{num}
+		: number(num)
 		, sign{s}
 	{}
 	
 	BigInt(const BigInt& other)
-		: number{other.number}
-		, sign{other.sign} 
+		: number(other.number)
+		, sign{other.sign}
 	{}
 
 	BigInt(BigInt&& other)
-		: number{move(other.number)}
+		: number(move(other.number))
 		, sign{other.sign}
 	{}
 	
@@ -62,7 +64,10 @@ public:
 	friend bool operator<=(const BigInt& left, const BigInt& right);
 	friend bool operator>=(const BigInt& left, const BigInt& right);
 
-	BigInt& operator+=(const BigInt& right);
+	friend ostream& operator<<(ostream& os, BigInt& val);
+	friend istream& operator>>(istream& is, BigInt& val);
+
+	BigInt operator+=(const BigInt& right);
 	BigInt& operator-=(const BigInt& right);
 	BigInt& operator*=(const BigInt& right);
 
@@ -72,13 +77,40 @@ public:
 	Number::iterator begin() { return number.begin(); }
 	Number::iterator end() { return number.end(); }
 
-	Elem operator[](size_t index) { return number[index]; }
-	Elem operator[](size_t index) const { return number[index]; }
+	Elem& operator[](size_t index) { return number[index]; }
+	const Elem& operator[](size_t index) const { return number[index]; }
 
 	size_t size() const { return number.size(); }
 
 private:
-	Number parse_int(int num);
+	template<typename T>
+	Number parse_numeric(T num);
+
+	// Base operations
+	BigInt add(const BigInt& right);
+	BigInt sub(const BigInt& right, bool saveSign);
+	
 	Number number;
 	Sign sign;
 };
+
+// Template methods
+
+template<typename T>
+BigInt::BigInt(const T num) {
+	static_assert(is_integral<T>::value, "Required integer type of argument !!");
+	sign = num < 0 ? negative : positive;
+	number = parse_numeric(num);
+}
+
+template<typename T>
+Number BigInt::parse_numeric(T num) {
+	static_assert(is_integral<T>::value, "Required integer type of argument !!");
+	Number n;
+	while (num) {
+		int i = num % 10;
+		n.push_back(i);
+		num /= 10;
+	}
+	return n;
+}
