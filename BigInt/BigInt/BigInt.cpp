@@ -26,36 +26,82 @@ bool comp(T x, T y, Func proof_f) {
 
 Ratio compare(const BigInt& left, const BigInt& right) {
 	if (
-		left.sign == positive && right.sign == negative &&
-		left.size() > right.size() && left.sign == positive &&
-		left.size() < right.size() && left.sign == negative && right.sign == positive
+		(left.sign == positive && right.sign == negative) ||
+		(left.size() > right.size() && left.sign == positive) ||
+		(left.size() < right.size() && right.sign == negative)
 		)
 		return Ratio::greater;
 
-	else if (
-		left.sign == negative && right.sign == positive &&
-		left.size() > right.size() && left.sign == negative &&
-		left.size() < right.size() && left.sign == positive && right.sign == negative
+	if (
+		(left.sign == negative && right.sign == positive) ||
+		(left.size() < right.size() && left.sign == positive) ||
+		(left.size() > right.size() && left.sign == negative)
 		)
 		return Ratio::less;
 	return Ratio::undefined;
 }
 
+BigInt abs(const BigInt& arg){
+	return arg.sign == positive ? arg : arg.make_opposite();
+}
+
+void front_track(Number& num, size_t i){
+	num[i] %= 10;
+	if (i == num.size() - 1)
+		num.push_back(1);
+	else num[i + 1] += 1;
+}
+
+void back_track(Number& num, size_t i){
+	num[i] += 10;
+	num[i + 1] -= 1;
+}
+
+
+// Assume that left if bigger
+BigInt substrct(const BigInt& left, const BigInt& right){
+	size_t i{}, j{};
+	size_t j_len = right.size();
+	size_t i_len = left.size();
+
+	// make BigInt with max length
+	BigInt res(left);
+
+	do {
+		res[i] -= right[j];
+
+		if (res[i] < 0)
+			back_track(res.number, i);
+
+		++i; ++j;
+
+	} while (j != j_len);
+
+	// Go deeper
+	for (; i < i_len && res[i] < 0; ++i)
+		back_track(res.number, i);
+
+	// remove trailing zeros
+	while (res.number.back() == 0)
+		res.number.pop_back();
+
+	return res;
+}
+
 // Constructors
 
-// TODO: Improve string constructor
 BigInt::BigInt(const string & num) {
 	auto beg = num.begin();
 	int is_dig = isdigit(*beg);
 	sign = is_dig || *beg == '+' ? positive : negative;
-	if (is_dig)
+	if (!is_dig)
 		++beg;
 	for (auto i = beg; i != num.end(); i++) {
-		number.emplace_back(int{*i}+'0');
+		number.emplace_front(*i - '0');
 	}
 }
 
-// Destructure
+// Destructor
 
 BigInt::~BigInt() {
 }
@@ -93,11 +139,16 @@ BigInt operator-(BigInt left, const BigInt & right) {
 }
 
 BigInt BigInt::operator+=(const BigInt & right) {
-	return add(right);
+	return 
+		sign == right.sign ? 
+			add(right) :
+		abs(*this) > abs(right) ?	
+			sub(right) :
+		substrct(right, *this);
 }
 
-BigInt& BigInt::operator-=(const BigInt & right) {
-	return *this;
+BigInt BigInt::operator-=(const BigInt & right) {
+	return sub(right);
 }
 
 BigInt& BigInt::operator*=(const BigInt & right) {
@@ -194,13 +245,6 @@ istream& operator>>(istream& is, BigInt& val){
 
 // Member-helpers
 
-void role(Number& num, size_t i){
-	num[i] %= 10;
-	if (i == num.size() - 1)
-		num.push_back(1);
-	else num[i + 1] += 1;
-}
-
 BigInt BigInt::add(const BigInt& right){
 	unsigned i{}, j{};
 
@@ -213,7 +257,7 @@ BigInt BigInt::add(const BigInt& right){
 		number[i] += right[j];
 
 		if (number[i] > 9)
-			role(number, i);
+			front_track(number, i);
 		
 		++i; ++j;
 
@@ -221,11 +265,36 @@ BigInt BigInt::add(const BigInt& right){
 	
 	// Go deeper
 	for (; i < size() && number[i] > 9; ++i)
-		role(number, i);
+		front_track(number, i);
 	
 	return *this;
 }
 
-BigInt BigInt::sub(const BigInt& right, bool saveSign){
+BigInt BigInt::sub(const BigInt& right){
+	unsigned i{}, j{};
+	size_t len = right.size();
+	// push zero elements to make diff <= 0
+	long int diff = len - size();
+	for (long k = 0; k < diff; k++)
+		number.push_back(0);
+
+	do {
+		number[i] -= right[j];
+
+		if (number[i] < 0)
+			back_track(number, i);
+
+		++i; ++j;
+
+	} while (j != len);
+
+	// Go deeper
+	for (; i < size() && number[i] < 0; ++i)
+		back_track(number, i);
+	
+	// remove trailing zeros
+	while (number.back() == 0)
+		number.pop_back();
+
 	return *this;
 }

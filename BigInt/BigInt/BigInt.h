@@ -25,9 +25,17 @@ public:
 		: number{}
 		, sign{positive}
 	{}
+
+	
 	template<typename T>
 	BigInt(const T num);
-	BigInt(const string& num) = delete; // Will be improved :3
+	
+	BigInt(size_t len, Elem val, Sign s = positive)
+		: number(Number(len, val))
+		, sign(s)
+	{}
+	
+	BigInt(const string& num);
 	BigInt(const Number& num, Sign s=positive)
 		: number(num)
 		, sign{s}
@@ -68,7 +76,7 @@ public:
 	friend istream& operator>>(istream& is, BigInt& val);
 
 	BigInt operator+=(const BigInt& right);
-	BigInt& operator-=(const BigInt& right);
+	BigInt operator-=(const BigInt& right);
 	BigInt& operator*=(const BigInt& right);
 
 	Number::const_iterator begin() const { return number.begin(); }
@@ -82,14 +90,20 @@ public:
 
 	size_t size() const { return number.size(); }
 
+	friend BigInt abs(const BigInt& arg);
+	friend BigInt substrct(const BigInt& left, const BigInt& right);
+
 private:
 	template<typename T>
 	Number parse_numeric(T num);
 
 	// Base operations
 	BigInt add(const BigInt& right);
-	BigInt sub(const BigInt& right, bool saveSign);
-	
+	BigInt sub(const BigInt& right);
+	BigInt change_sign(){ sign = !sign; return *this; }
+	BigInt make_opposite() const { return BigInt(number, !sign); }
+
+
 	Number number;
 	Sign sign;
 };
@@ -100,7 +114,7 @@ template<typename T>
 BigInt::BigInt(const T num) {
 	static_assert(is_integral<T>::value, "Required integer type of argument !!");
 	sign = num < 0 ? negative : positive;
-	number = parse_numeric(num);
+	number = parse_numeric(abs(num));
 }
 
 template<typename T>

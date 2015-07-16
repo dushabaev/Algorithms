@@ -8,24 +8,20 @@ using namespace std;
 int main() {
 	BigInt b1, b2;
 	default_random_engine re{};
-	uniform_int_distribution<unsigned> d{0, numeric_limits<unsigned>::max() / 2 - 1};
+	uniform_int_distribution<long long> d{numeric_limits<int>::min(), numeric_limits<int>::max()};
 	auto rnd = bind(d, re);
 	bool flag{true};
 
-	BigInt x(string("111111111122255555"));
-	BigInt y(string("5"));
-
-	cout << x + y << endl;
-
-
-	for (size_t i = 0; i > 10000 && flag; i++) {
-		unsigned x, y;
+	for (size_t i = 0; i < 10000 && flag; i++) {
+		long long x, y;
 		BigInt bx, by;
-		bx = x = rnd(); by = y = rnd();
+		bx = x = rnd(); 
+		by = y = rnd();
+		long long sum = x + y;
+		cout << "[" << (flag ? '+' : '-') << "] " << x << " + " << y << " = " << sum << endl;
 
-		unsigned sum = x + y;
-		BigInt bsum = bx + by;
-
+		BigInt bsum(bx + by);
+		
 		if (bsum != sum) {
 			flag = false;
 			cout
@@ -38,7 +34,6 @@ int main() {
 				<< "BI sum = " << bsum << endl;
 		}
 
-		cout << "[" << (flag ? '+' : '-') << "] " << x << " + " << y << " = " << sum;
 	}
 	cout << (flag ? "Ok." : "Failed.")<< endl;
 	/*cout << "Enter num 1: "; cin >> b1;
