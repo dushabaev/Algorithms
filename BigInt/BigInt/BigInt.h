@@ -76,9 +76,11 @@ public:
 	friend ostream& operator<<(ostream& os, BigInt& val);
 	friend istream& operator>>(istream& is, BigInt& val);
 
+	friend BigInt fit(BigInt& left, BigInt& right);
+
 	BigInt operator+=(const BigInt& right);
 	BigInt operator-=(const BigInt& right);
-	BigInt& operator*=(const BigInt& right);
+	BigInt operator*=(BigInt right);
 
 	Number::const_iterator begin() const { return number.begin(); }
 	Number::const_iterator end() const { return number.end(); }

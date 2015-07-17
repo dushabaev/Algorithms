@@ -52,6 +52,9 @@ void back_track(Number& num, size_t i){
 	num[i + 1] -= 1;
 }
 
+BigInt fit(BigInt& left, BigInt& right){
+	// TODO: MAKE FIT TO MULTIPLE BOTH OF 2
+}
 
 // Assume that left if bigger
 BigInt subtrct(const BigInt& left, const BigInt& right){
@@ -160,7 +163,7 @@ BigInt BigInt::operator-=(const BigInt & right) {
 	else return subtrct(right, *this).change_sign();
 }
 
-BigInt& BigInt::operator*=(const BigInt & right) {
+BigInt BigInt::operator*=(BigInt right) {
 	return *this;
 }
 
