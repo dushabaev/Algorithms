@@ -103,7 +103,8 @@ private:
 	BigInt sub(const BigInt& right);
 	BigInt change_sign(){ sign = !sign; return *this; }
 	BigInt make_opposite() const { return BigInt(number, !sign); }
-
+	template<typename T>
+	BigInt pow10(T exp);
 
 	Number number;
 	Sign sign;
@@ -128,4 +129,11 @@ Number BigInt::parse_numeric(T num) {
 		num /= 10;
 	}
 	return n;
+}
+
+template<typename T>
+BigInt::BigInt pow10(T exp){
+	assert(is_integral<T>::value, "Required integer type of argument !!");
+	for (size_t i = 0; i < exp; i++)
+		Number.push_front(0);
 }
