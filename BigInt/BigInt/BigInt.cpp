@@ -2,6 +2,7 @@
 #include <functional>
 #include <cctype>
 #include <iterator>
+#include <memory>
 
 // Helpers
 //typename T::value_type
@@ -52,8 +53,19 @@ void back_track(Number& num, size_t i){
 	num[i + 1] -= 1;
 }
 
+// Add trail zeros to make left & right sizes equal and even
 BigInt fit(BigInt& left, BigInt& right){
-	// TODO: MAKE FIT TO MULTIPLE BOTH OF 2
+	BigInt *bigger, *smaller;
+	if (left.size() > right.size())
+		bigger = &left, smaller = &right;
+	else
+		bigger = &right, smaller = &left;
+	
+	if (bigger->size() % 2)
+		bigger->add_trail_zero(1);
+
+	smaller->add_trail_zero(bigger->size() - smaller->size());
+
 }
 
 // Assume that left if bigger

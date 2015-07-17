@@ -78,6 +78,9 @@ public:
 
 	friend BigInt fit(BigInt& left, BigInt& right);
 
+	template<typename T>
+	BigInt add_trail_zero(T count);
+
 	BigInt operator+=(const BigInt& right);
 	BigInt operator-=(const BigInt& right);
 	BigInt operator*=(BigInt right);
@@ -137,5 +140,12 @@ template<typename T>
 BigInt::BigInt pow10(T exp){
 	assert(is_integral<T>::value, "Required integer type of argument !!");
 	for (size_t i = 0; i < exp; i++)
-		Number.push_front(0);
+		number.push_front(0);
+}
+
+template<typename T>
+BigInt BigInt::add_trail_zero(T count){
+	assert(is_integral<T>::value, "Required integer type of argument !!");
+	for (size_t i = 0; i < exp; i++)
+		number.push_back(0);
 }
