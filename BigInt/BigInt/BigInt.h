@@ -36,6 +36,7 @@ public:
 	{}
 	
 	BigInt(const string& num);
+	BigInt(const char* num);
 	BigInt(const Number& num, Sign s=positive)
 		: number(num)
 		, sign{s}

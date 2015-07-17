@@ -17,11 +17,6 @@ bool comp(T x, T y, Func proof_f) {
 		--i; --j;
 	}
 	return proof_f(*i, *j);
-	/*size_t len = x.size();
-	size_t i = 0;
-	while (i < len-1 && x[i] == y[i])
-		++i;
-	return f(x[i], y[i]);*/
 }
 
 Ratio compare(const BigInt& left, const BigInt& right) {
@@ -96,9 +91,19 @@ BigInt::BigInt(const string & num) {
 	sign = is_dig || *beg == '+' ? positive : negative;
 	if (!is_dig)
 		++beg;
-	for (auto i = beg; i != num.end(); i++) {
-		number.emplace_front(*i - '0');
-	}
+	for (auto i = beg; i != num.end(); i++) 
+		number.push_front(*i - '0');
+}
+
+BigInt::BigInt(const char* num){
+	if (!num)
+		throw("BigInt::BigInt(const char* num) => num == nullptr or num == NULL");
+	
+	if (!isdigit(*num))
+		sign = *(num++) == '+' ? positive : negative;
+
+	while (*num)
+		number.push_front(*(num++) - '0');
 }
 
 // Destructor
@@ -148,7 +153,11 @@ BigInt BigInt::operator+=(const BigInt & right) {
 }
 
 BigInt BigInt::operator-=(const BigInt & right) {
-	return sub(right);
+	if (sign != right.sign)
+		return add(right);
+	if (abs(*this) > abs(right))
+		return sub(right);
+	else return substrct(right, *this).change_sign();
 }
 
 BigInt& BigInt::operator*=(const BigInt & right) {
