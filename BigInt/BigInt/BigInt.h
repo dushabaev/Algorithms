@@ -92,7 +92,7 @@ public:
 	size_t size() const { return number.size(); }
 
 	friend BigInt abs(const BigInt& arg);
-	friend BigInt substrct(const BigInt& left, const BigInt& right);
+	friend BigInt subtrct(const BigInt& left, const BigInt& right);
 
 private:
 	template<typename T>

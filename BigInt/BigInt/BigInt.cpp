@@ -54,7 +54,7 @@ void back_track(Number& num, size_t i){
 
 
 // Assume that left if bigger
-BigInt substrct(const BigInt& left, const BigInt& right){
+BigInt subtrct(const BigInt& left, const BigInt& right){
 	size_t i{}, j{};
 	size_t j_len = right.size();
 	size_t i_len = left.size();
@@ -149,7 +149,7 @@ BigInt BigInt::operator+=(const BigInt & right) {
 			add(right) :
 		abs(*this) > abs(right) ?	
 			sub(right) :
-		substrct(right, *this);
+		subtrct(right, *this);
 }
 
 BigInt BigInt::operator-=(const BigInt & right) {
@@ -157,7 +157,7 @@ BigInt BigInt::operator-=(const BigInt & right) {
 		return add(right);
 	if (abs(*this) > abs(right))
 		return sub(right);
-	else return substrct(right, *this).change_sign();
+	else return subtrct(right, *this).change_sign();
 }
 
 BigInt& BigInt::operator*=(const BigInt & right) {
