@@ -51,7 +51,13 @@ public:
 		: number(move(other.number))
 		, sign{other.sign}
 	{}
-	
+
+	template<typename Iter>
+	BigInt(Iter first, Iter last, Sign s)
+		: number(first, last)
+		, sign(s)
+	{}
+
 	BigInt& operator=(const BigInt& other);
 	BigInt& operator=(BigInt&& other);
 
@@ -63,6 +69,7 @@ public:
 
 	friend BigInt operator+(BigInt left, const BigInt& right);
 	friend BigInt operator-(BigInt left, const BigInt& right);
+	friend BigInt operator*(BigInt left, const BigInt& right);
 
 	friend Ratio compare(const BigInt& left, const BigInt& right);
 
@@ -76,7 +83,7 @@ public:
 	friend ostream& operator<<(ostream& os, BigInt& val);
 	friend istream& operator>>(istream& is, BigInt& val);
 
-	friend BigInt fit(BigInt& left, BigInt& right);
+	friend size_t fit(BigInt& left, BigInt& right);
 
 	template<typename T>
 	BigInt add_trail_zero(T count);
@@ -108,6 +115,7 @@ private:
 	BigInt sub(const BigInt& right);
 	BigInt change_sign(){ sign = !sign; return *this; }
 	BigInt make_opposite() const { return BigInt(number, !sign); }
+	
 	template<typename T>
 	BigInt pow10(T exp);
 
@@ -137,15 +145,21 @@ Number BigInt::parse_numeric(T num) {
 }
 
 template<typename T>
-BigInt::BigInt pow10(T exp){
-	assert(is_integral<T>::value, "Required integer type of argument !!");
+BigInt BigInt::pow10(T exp){
+	static_assert(is_integral<T>::value, "Required integer type of argument !!");
+	if (exp < 0)
+		throw("Exponent is < 0");
 	for (size_t i = 0; i < exp; i++)
 		number.push_front(0);
+	return *this;
 }
 
 template<typename T>
 BigInt BigInt::add_trail_zero(T count){
-	assert(is_integral<T>::value, "Required integer type of argument !!");
-	for (size_t i = 0; i < exp; i++)
+	static_assert(is_integral<T>::value, "Required integer type of argument !!");
+	if (count < 0)
+		throw("Count is < 0");
+	for (size_t i = 0; i < count; i++)
 		number.push_back(0);
+	return *this;
 }

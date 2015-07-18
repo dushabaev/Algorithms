@@ -54,9 +54,17 @@ void back_track(Number& num, size_t i){
 }
 
 // Add trail zeros to make left & right sizes equal and even
-BigInt fit(BigInt& left, BigInt& right){
+// Return 1 if left & right sizes are equal to 1
+size_t fit(BigInt& left, BigInt& right){
 	BigInt *bigger, *smaller;
-	if (left.size() > right.size())
+
+	auto lsz = left.size();
+	auto rsz = right.size();
+	
+	if (lsz == 1 && rsz == 1)
+		return 1;
+
+	if (lsz > rsz)
 		bigger = &left, smaller = &right;
 	else
 		bigger = &right, smaller = &left;
@@ -65,7 +73,7 @@ BigInt fit(BigInt& left, BigInt& right){
 		bigger->add_trail_zero(1);
 
 	smaller->add_trail_zero(bigger->size() - smaller->size());
-
+	return bigger->size();
 }
 
 // Assume that left if bigger
@@ -176,7 +184,29 @@ BigInt BigInt::operator-=(const BigInt & right) {
 }
 
 BigInt BigInt::operator*=(BigInt right) {
-	return *this;
+	auto sz = fit(*this, right);
+	if (sz == 1)
+		return *(this->begin())*(*right.begin());
+
+	auto beg = this->begin();
+	auto end = this->end();
+	auto mid = beg + sz / 2;
+
+	BigInt a(beg, mid, positive);
+	BigInt b(mid, end, positive);
+
+	beg = right.begin();
+	end = right.end();
+	mid = beg + sz / 2;
+	
+	BigInt c(beg, mid, positive);
+	BigInt d(mid, end, positive);
+
+	BigInt sum((a + b)*(c + d));
+	a *= c;
+	b *= d;
+
+	return a.pow10(sz) + (sum-(a+b)).pow10(sz/2) + b;
 }
 
 // Unary operators

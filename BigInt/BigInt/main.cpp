@@ -36,11 +36,14 @@ int main() {
 	}
 	cout << (flag ? "Ok." : "Failed.")<< endl;*/
 	BigInt
-		b1("-2999458865415082029"),
-		b2("-1717806038993388682");
-	//cout << "Enter num 1: "; cin >> b1;
-	//cout << "Enter num 2: "; cin >> b2;
-	cout << b1 << " + " << b2 << " = " << b1 + b2 << endl;
-	cout << b1 << " - " << b2 << " = " << b1 - b2 << endl;
+		b1,//("-2999458865415082029"),
+		b2;//("-1717806038993388682");
+	cout << "Enter num 1: "; cin >> b1;
+	cout << "Enter num 2: "; cin >> b2;
+	
+	//cout << b1 << endl << b2 << endl;
+	cout << b1 << " * " << b2 << " = " << b1 * b2 << endl;
+	//cout << b1 << " + " << b2 << " = " << b1 + b2 << endl;
+	//cout << b1 << " - " << b2 << " = " << b1 - b2 << endl;
 	return 0;
 }
