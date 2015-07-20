@@ -2,7 +2,8 @@
 #include <deque>
 #include <iostream>
 #include <type_traits>
-
+extern unsigned int  counter;
+extern int value;
 using namespace std;
 
 template<typename C>
@@ -90,7 +91,7 @@ public:
 
 	BigInt operator+=(const BigInt& right);
 	BigInt operator-=(const BigInt& right);
-	BigInt operator*=(BigInt right);
+	BigInt operator*=(const BigInt& right);
 
 	Number::const_iterator begin() const { return number.begin(); }
 	Number::const_iterator end() const { return number.end(); }
@@ -105,7 +106,6 @@ public:
 
 	friend BigInt abs(const BigInt& arg);
 	friend BigInt subtrct(const BigInt& left, const BigInt& right);
-
 private:
 	template<typename T>
 	Number parse_numeric(T num);
@@ -113,11 +113,14 @@ private:
 	// Base operations
 	BigInt add(const BigInt& right);
 	BigInt sub(const BigInt& right);
+	BigInt mult(BigInt right);
 	BigInt change_sign(){ sign = !sign; return *this; }
 	BigInt make_opposite() const { return BigInt(number, !sign); }
 	
 	template<typename T>
 	BigInt pow10(T exp);
+	bool is_zero();
+	BigInt rm_zeros();
 
 	Number number;
 	Sign sign;
@@ -136,17 +139,18 @@ template<typename T>
 Number BigInt::parse_numeric(T num) {
 	static_assert(is_integral<T>::value, "Required integer type of argument !!");
 	Number n;
-	while (num) {
-		int i = num % 10;
-		n.push_back(i);
+	do {
+		n.push_back(num % 10);
 		num /= 10;
-	}
+	} while (num);
 	return n;
 }
 
 template<typename T>
 BigInt BigInt::pow10(T exp){
 	static_assert(is_integral<T>::value, "Required integer type of argument !!");
+	if (this->is_zero())
+		return 0;
 	if (exp < 0)
 		throw("Exponent is < 0");
 	for (size_t i = 0; i < exp; i++)

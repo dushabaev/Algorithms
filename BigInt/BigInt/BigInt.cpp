@@ -3,7 +3,8 @@
 #include <cctype>
 #include <iterator>
 #include <memory>
-
+unsigned int  counter{};
+int value{};
 // Helpers
 //typename T::value_type
 template<typename T, typename Func>
@@ -53,6 +54,7 @@ void back_track(Number& num, size_t i){
 	num[i + 1] -= 1;
 }
 
+
 // Add trail zeros to make left & right sizes equal and even
 // Return 1 if left & right sizes are equal to 1
 size_t fit(BigInt& left, BigInt& right){
@@ -99,11 +101,7 @@ BigInt subtrct(const BigInt& left, const BigInt& right){
 	for (; i < i_len && res[i] < 0; ++i)
 		back_track(res.number, i);
 
-	// remove trailing zeros
-	while (res.number.back() == 0)
-		res.number.pop_back();
-
-	return res;
+	return res.rm_zeros();
 }
 
 // Constructors
@@ -122,8 +120,11 @@ BigInt::BigInt(const char* num){
 	if (!num)
 		throw("BigInt::BigInt(const char* num) => num == nullptr or num == NULL");
 	
-	if (!isdigit(*num))
-		sign = *(num++) == '+' ? positive : negative;
+	int is_dig = isdigit(*num);
+	sign = is_dig || *num == '+' ? positive : negative;
+	
+	if (!is_dig)
+		++num;
 
 	while (*num)
 		number.push_front(*(num++) - '0');
@@ -183,30 +184,11 @@ BigInt BigInt::operator-=(const BigInt & right) {
 	else return subtrct(right, *this).change_sign();
 }
 
-BigInt BigInt::operator*=(BigInt right) {
-	auto sz = fit(*this, right);
-	if (sz == 1)
-		return *(this->begin())*(*right.begin());
-
-	auto beg = this->begin();
-	auto end = this->end();
-	auto mid = beg + sz / 2;
-
-	BigInt a(beg, mid, positive);
-	BigInt b(mid, end, positive);
-
-	beg = right.begin();
-	end = right.end();
-	mid = beg + sz / 2;
-	
-	BigInt c(beg, mid, positive);
-	BigInt d(mid, end, positive);
-
-	BigInt sum((a + b)*(c + d));
-	a *= c;
-	b *= d;
-
-	return a.pow10(sz) + (sum-(a+b)).pow10(sz/2) + b;
+BigInt BigInt::operator*=(const BigInt& right) {
+	auto t = this->sign;
+	*this = this->mult(right);
+	this->sign = t != right.sign ? negative : positive;
+	return *this;
 }
 
 // Unary operators
@@ -324,6 +306,8 @@ BigInt BigInt::add(const BigInt& right){
 	return *this;
 }
 
+
+
 BigInt BigInt::sub(const BigInt& right){
 	unsigned i{}, j{};
 	size_t len = right.size();
@@ -345,10 +329,52 @@ BigInt BigInt::sub(const BigInt& right){
 	// Go deeper
 	for (; i < size() && number[i] < 0; ++i)
 		back_track(number, i);
-	
-	// remove trailing zeros
-	while (number.back() == 0)
-		number.pop_back();
 
+	return this->rm_zeros();
+}
+
+BigInt BigInt::mult(BigInt right) {
+	auto sz = fit(*this, right);
+	if (sz == 1)
+		return *this = number[0] * right[0];
+
+	auto beg = this->begin();
+	auto end = this->end();
+	auto mid = beg + sz / 2;
+
+	BigInt a(mid, end, positive);
+	BigInt b(beg, mid, positive);
+
+	beg = right.begin();
+	end = right.end();
+	mid = beg + sz / 2;
+
+	BigInt c(mid, end, positive);
+	BigInt d(beg, mid, positive);
+
+	BigInt sum(a + b);
+	sum.mult(c + d);
+
+	a.mult(c);
+	b.mult(d);
+	auto t1 = a + b;
+	auto t2 = sum - t1;
+	t2 = t2.rm_zeros();
+	if (t2 == value)
+		++counter;
+	return *this = a.pow10(sz) + t2.pow10(sz / 2) + b;
+}
+
+bool BigInt::is_zero() {
+	auto it = this->begin();
+	auto finish = this->end();
+	while (it != finish && *it == 0)
+		++it;
+	return it == finish;
+}
+
+BigInt BigInt::rm_zeros() {
+	while (number.size() > 1 && number.back() == 0)
+		number.pop_back();
 	return *this;
 }
